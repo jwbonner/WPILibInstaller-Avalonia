@@ -1,4 +1,4 @@
-﻿namespace WPILibInstaller.Models
+namespace WPILibInstaller.Models
 {
     public class ShortcutData
     {
@@ -7,6 +7,7 @@
         public List<NewEnvVariable> NewEnvironmentalVariables { get; set; } = new();
         public List<ShortcutInfo> StartMenuShortcuts { get; set; } = new List<ShortcutInfo>();
         public List<AddedPathVariable> AddToPath { get; set; } = new();
+        public List<FileAssociationInfo> FileAssociations { get; set; } = new();
     }
 
     public class ShortcutInfo
@@ -36,5 +37,25 @@
     public class AddedPathVariable
     {
         public string Path { get; set; } = "";
+    }
+
+    public class FileAssociationInfo
+    {
+        public FileAssociationInfo() { }
+
+        public FileAssociationInfo(string extension, string progId, string name, string executablePath, string iconPath)
+        {
+            Extension = extension;
+            ProgId = progId;
+            Name = name;
+            ExecutablePath = executablePath;
+            IconPath = iconPath;
+        }
+
+        public string Extension { get; set; } = "";
+        public string ProgId { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string ExecutablePath { get; set; } = "";
+        public string IconPath { get; set; } = "";
     }
 }

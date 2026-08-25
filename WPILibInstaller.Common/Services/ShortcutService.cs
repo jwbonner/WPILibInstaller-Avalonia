@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -66,6 +66,43 @@ namespace WPILibInstaller.Services
             {
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "documentation", "frc-docs", "index.html"), $"{wpilibYear} WPILib Documentation", $"{wpilibYear} WPILib Documentation", wpilibIconLocation));
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "documentation", "frc-docs", "index.html"), $"Programs/{wpilibYear} WPILib Documentation", $"{wpilibYear} WPILib Documentation", wpilibIconLocation));
+            }
+
+            var advantageScopeDir = Path.Join(wpilibHomePath, configurationProvider.AdvantageScopeConfig.Folder);
+            var advantageScopeExe = Path.Join(advantageScopeDir, "AdvantageScope (WPILib).exe");
+            var advantageScopeAssociations = LoadFileAssociations(advantageScopeDir);
+
+            foreach (var assoc in advantageScopeAssociations)
+            {
+                if (string.IsNullOrEmpty(assoc.Ext))
+                {
+                    continue;
+                }
+
+                var ext = assoc.Ext.StartsWith('.') ? assoc.Ext : "." + assoc.Ext;
+                var progId = $"AdvantageScope{ext}";
+                string iconLocation = "";
+                if (!string.IsNullOrEmpty(assoc.Icon))
+                {
+                    var iconPath1 = Path.Join(advantageScopeDir, "resources", "app", assoc.Icon);
+                    var iconPath2 = Path.Join(advantageScopeDir, assoc.Icon);
+                    if (File.Exists(iconPath1))
+                    {
+                        iconLocation = iconPath1;
+                    }
+                    else if (File.Exists(iconPath2))
+                    {
+                        iconLocation = iconPath2;
+                    }
+                }
+
+                shortcutData.FileAssociations.Add(new FileAssociationInfo(
+                    ext,
+                    progId,
+                    assoc.Name ?? $"AdvantageScope ({ext})",
+                    advantageScopeExe,
+                    iconLocation
+                ));
             }
 
             var serializedData = JsonSerializer.Serialize(shortcutData, SourceGenerationContext.Default.ShortcutData);
@@ -203,7 +240,23 @@ StartupWMClass=code
             }
 
             var installDir = configurationProvider.InstallDirectory;
-            await CreateLinuxShortcut("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+            var advantageScopeDir = Path.Join(installDir, configurationProvider.AdvantageScopeConfig.Folder);
+            var advantageScopeAssociations = LoadFileAssociations(advantageScopeDir);
+            string? advantageScopeMimeTypes = null;
+            if (advantageScopeAssociations.Count > 0)
+            {
+                var mimeList = advantageScopeAssociations
+                    .Where(a => !string.IsNullOrEmpty(a.MimeType))
+                    .Select(a => a.MimeType)
+                    .Distinct();
+                var joined = string.Join(";", mimeList);
+                if (!string.IsNullOrEmpty(joined))
+                {
+                    advantageScopeMimeTypes = joined + ";";
+                }
+            }
+
+            await CreateLinuxShortcut("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token, advantageScopeMimeTypes);
             await CreateLinuxShortcut("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
             await CreateLinuxShortcut("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
             await CreateLinuxShortcut("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
@@ -212,9 +265,11 @@ StartupWMClass=code
             await CreateLinuxShortcut("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
         }
 
-        private async Task CreateLinuxShortcut(string name, string executableName, string wpilibYear, string wmClass, string iconName, CancellationToken token)
+        private async Task CreateLinuxShortcut(string name, string executableName, string wpilibYear, string wmClass, string iconName, CancellationToken token, string? mimeTypes = null)
         {
             var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{wpilibYear}.desktop");
+            string mimeLine = !string.IsNullOrEmpty(mimeTypes) ? $"MimeType={mimeTypes}\n" : "";
+            string execSuffix = !string.IsNullOrEmpty(mimeTypes) ? " %F" : "";
             string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
@@ -222,12 +277,12 @@ Type=Application
 Categories=Robotics;Science
 Name={name} {wpilibYear}
 Comment={name} tool for the {wpilibYear} FIRST Robotics Competition season
-Exec={(Path.IsPathRooted(executableName) || executableName.Contains('/') ? executableName : $"{configurationProvider.InstallDirectory}/tools/{executableName}")}
+Exec={(Path.IsPathRooted(executableName) || executableName.Contains('/') ? executableName : $"{configurationProvider.InstallDirectory}/tools/{executableName}")}{execSuffix}
 Icon={configurationProvider.InstallDirectory}/icons/{iconName}
 Terminal=false
 StartupNotify=true
 StartupWMClass={wmClass}
-".ReplaceLineEndings("\n");
+{mimeLine}".ReplaceLineEndings("\n");
             var launcherPath = Path.GetDirectoryName(launcherFile);
             if (launcherPath != null)
             {
@@ -235,6 +290,25 @@ StartupWMClass={wmClass}
             }
 
             await File.WriteAllTextAsync(launcherFile, contents, token);
+        }
+
+        private static List<FileAssociation> LoadFileAssociations(string toolDirectory)
+        {
+            var manifestPath = Path.Combine(toolDirectory, "fileAssociations.json");
+            if (!File.Exists(manifestPath))
+            {
+                return new List<FileAssociation>();
+            }
+
+            try
+            {
+                var json = File.ReadAllText(manifestPath);
+                return JsonSerializer.Deserialize(json, SourceGenerationContext.Default.ListFileAssociation) ?? new List<FileAssociation>();
+            }
+            catch
+            {
+                return new List<FileAssociation>();
+            }
         }
     }
 }

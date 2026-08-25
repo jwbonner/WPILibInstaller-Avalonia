@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
@@ -44,6 +44,11 @@ internal static class Program
 
         bool createdStartMenu = startMenuFolder is not null
             && ShortcutCreator.CreateShortcuts(shortcutData.StartMenuShortcuts, startMenuFolder);
+
+        if (shortcutData.FileAssociations.Count > 0)
+        {
+            FileAssociationCreator.RegisterFileAssociations(shortcutData.FileAssociations, shortcutData.IsAdmin);
+        }
 
         return createdDesktop && createdStartMenu
             ? WpilibSuccess

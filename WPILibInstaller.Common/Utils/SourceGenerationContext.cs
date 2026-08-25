@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using WPILibInstaller.Models;
 
 namespace WPILibInstaller.Utils;
@@ -24,6 +24,10 @@ namespace WPILibInstaller.Utils;
 [JsonSerializable(typeof(ShortcutInfo))]
 [JsonSerializable(typeof(NewEnvVariable))]
 [JsonSerializable(typeof(AddedPathVariable))]
+[JsonSerializable(typeof(FileAssociation))]
+[JsonSerializable(typeof(List<FileAssociation>))]
+[JsonSerializable(typeof(FileAssociationInfo))]
+[JsonSerializable(typeof(List<FileAssociationInfo>))]
 public sealed partial class SourceGenerationContext : JsonSerializerContext
 {
 }
