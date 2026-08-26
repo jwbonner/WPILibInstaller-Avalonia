@@ -1,4 +1,4 @@
-namespace WPILibInstaller.Models
+﻿namespace WPILibInstaller.Models
 {
     public class ShortcutData
     {
