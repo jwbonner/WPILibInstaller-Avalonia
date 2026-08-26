@@ -81,18 +81,18 @@ namespace WPILibInstaller.Services
 
                 var ext = assoc.Ext.StartsWith('.') ? assoc.Ext : "." + assoc.Ext;
                 var progId = $"AdvantageScope{ext}";
-                string iconLocation = "";
+                string assocIconLocation = "";
                 if (!string.IsNullOrEmpty(assoc.Icon))
                 {
                     var iconPath1 = Path.Join(advantageScopeDir, "resources", "app", assoc.Icon);
                     var iconPath2 = Path.Join(advantageScopeDir, assoc.Icon);
                     if (File.Exists(iconPath1))
                     {
-                        iconLocation = iconPath1;
+                        assocIconLocation = iconPath1;
                     }
                     else if (File.Exists(iconPath2))
                     {
-                        iconLocation = iconPath2;
+                        assocIconLocation = iconPath2;
                     }
                 }
 
@@ -101,7 +101,7 @@ namespace WPILibInstaller.Services
                     progId,
                     assoc.Name ?? $"AdvantageScope ({ext})",
                     advantageScopeExe,
-                    iconLocation
+                    assocIconLocation
                 ));
             }
 
