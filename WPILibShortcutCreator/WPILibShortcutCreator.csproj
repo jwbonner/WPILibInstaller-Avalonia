@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <DirectPInvoke Include="ole32" />
-    <DirectPInvoke Include="shell32" />
     <ProjectReference Include="..\WPILibInstaller.Common\WPILibInstaller.Common.csproj" />
   </ItemGroup>
 </Project>
