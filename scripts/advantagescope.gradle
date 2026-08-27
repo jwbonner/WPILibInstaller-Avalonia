@@ -1,6 +1,6 @@
 apply from: 'scripts/versions.gradle'
 
-def baseUrl = "https://github.com/Mechanical-Advantage/AdvantageScope/releases/download/$advantagescopeGitTag/"
+def baseUrl = "https://github.com/jwbonner/AdvantageScope/releases/download/$advantagescopeGitTag/"
 
 def fileNameWindows = "advantagescope-wpilib-win-x64.zip"
 
