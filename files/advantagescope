@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+SCRIPT_PATH="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+SANDBOX_PATH="$(realpath "$(find "$SCRIPT_PATH" -type f -name chrome-sandbox)")"
+APP_PATH="$(realpath "$(find "$SCRIPT_PATH" -type f -name advantagescope-wpilib | head -n 1)")"
+
+if [ "$(sysctl -n kernel.apparmor_restrict_unprivileged_userns)" -eq "0" ] || [ "$(stat -c "%U" "$SANDBOX_PATH")" == "root" ] || [ -f "/etc/apparmor.advantagescope" ]; then
+	"$APP_PATH" "$@"
+else
+        "$APP_PATH" --no-sandbox "$@"
+fi

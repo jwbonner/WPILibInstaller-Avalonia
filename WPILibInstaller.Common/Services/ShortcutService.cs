@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -203,7 +203,7 @@ StartupWMClass=code
             }
 
             var installDir = configurationProvider.InstallDirectory;
-            await CreateLinuxShortcutIfInstalled("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+            await CreateLinuxShortcutIfInstalled("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
             await CreateLinuxShortcutIfInstalled("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
             await CreateLinuxShortcutIfInstalled("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
             await CreateLinuxShortcutIfInstalled("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);

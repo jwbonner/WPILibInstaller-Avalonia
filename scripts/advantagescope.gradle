@@ -1,5 +1,7 @@
 apply from: 'scripts/versions.gradle'
 
+def advantageScopeWrapper = file("files/advantagescope")
+
 def baseUrl = "https://github.com/Mechanical-Advantage/AdvantageScope/releases/download/$advantagescopeGitTag/"
 
 def fileNameWindows = "advantagescope-wpilib-win-x64.zip"
@@ -106,19 +108,29 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
     zip.dependsOn downloadTaskLinux
 
     zip.inputs.files downloadTaskLinux.get().outputFiles
+    zip.inputs.file advantageScopeWrapper
 
     zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
       into '/advantagescope'
       includeEmptyDirs = false
     }
+
+    zip.from(advantageScopeWrapper) {
+      into '/advantagescope'
+    }
   } else if (project.hasProperty('linuxBuildArm64')) {
     zip.dependsOn downloadTaskLinuxArm64
 
     zip.inputs.files downloadTaskLinuxArm64.get().outputFiles
+    zip.inputs.file advantageScopeWrapper
 
     zip.from(project.zipTree(downloadTaskLinuxArm64.get().outputFiles.first())) {
       into '/advantagescope'
       includeEmptyDirs = false
+    }
+
+    zip.from(advantageScopeWrapper) {
+      into '/advantagescope'
     }
   } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
