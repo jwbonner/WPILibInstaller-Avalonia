@@ -1,4 +1,4 @@
-﻿using System.Formats.Tar;
+using System.Formats.Tar;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -11,7 +11,12 @@ async Task InstallElastic(string toolsPath)
         var archiveFileName = "Elastic-WPILib-macOS.tar.gz";
         var elasticFolder = Path.Combine(Path.GetDirectoryName(toolsPath)!, "elastic");
         var archivePath = Path.Combine(elasticFolder, archiveFileName);
-        await TarFile.ExtractToDirectoryAsync(archivePath, elasticFolder, overwriteFiles: true);
+        if (File.Exists(archivePath))
+        {
+            await using var fileStream = File.OpenRead(archivePath);
+            await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+            await TarFile.ExtractToDirectoryAsync(gzipStream, elasticFolder, overwriteFiles: true);
+        }
     }
     Console.WriteLine("Installed Elastic");
 }
@@ -24,7 +29,12 @@ async Task InstallAdvantageScope(string toolsPath)
         var archiveFileName = $"advantagescope-wpilib-mac-{archName}.tar.gz";
         var advantageScopeFolder = Path.Combine(Path.GetDirectoryName(toolsPath)!, "advantagescope");
         var archivePath = Path.Combine(advantageScopeFolder, archiveFileName);
-        await TarFile.ExtractToDirectoryAsync(archivePath, advantageScopeFolder, overwriteFiles: true);
+        if (File.Exists(archivePath))
+        {
+            await using var fileStream = File.OpenRead(archivePath);
+            await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+            await TarFile.ExtractToDirectoryAsync(gzipStream, advantageScopeFolder, overwriteFiles: true);
+        }
     }
     Console.WriteLine("Installed AdvantageScope");
 }
